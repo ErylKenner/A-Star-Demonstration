@@ -33,7 +33,7 @@ public class SceneManager : MonoBehaviour
         switch (state)
         {
             case State.CalculatePath:
-                groundGrid.SetUnoccupiedNodesToEmpty();
+                groundGrid.HidePath();
                 state = State.CalculatePath2;
                 break;
             case State.CalculatePath2:
@@ -105,7 +105,7 @@ public class SceneManager : MonoBehaviour
                 if (Physics.Raycast(ray, out hit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Node")))
                 {
                     Node collidedNode = hit.collider.GetComponent<Node>();
-                    if (collidedNode.State != Node.NodeState.occupied && collidedNode != groundGrid.startNode && collidedNode != groundGrid.endNode)
+                    if (!collidedNode.IsOccupied() && collidedNode != groundGrid.startNode && collidedNode != groundGrid.endNode)
                     {
                         groundGrid.StartSprite.transform.position = new Vector3(collidedNode.transform.position.x, groundGrid.StartSprite.transform.position.y, collidedNode.transform.position.z);
                         groundGrid.startNode = collidedNode;
@@ -126,7 +126,7 @@ public class SceneManager : MonoBehaviour
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, 1 << LayerMask.NameToLayer("Node")))
             {
                 Node collidedNode = hit.collider.GetComponent<Node>();
-                if (collidedNode.State != Node.NodeState.occupied && collidedNode != groundGrid.startNode && collidedNode != groundGrid.endNode)
+                if (!collidedNode.IsOccupied() && collidedNode != groundGrid.startNode && collidedNode != groundGrid.endNode)
                 {
                     groundGrid.EndSprite.transform.position = new Vector3(collidedNode.transform.position.x, groundGrid.EndSprite.transform.position.y, collidedNode.transform.position.z);
                     groundGrid.endNode = collidedNode;

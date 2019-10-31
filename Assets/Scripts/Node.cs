@@ -6,74 +6,81 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class Node : MonoBehaviour
 {
-    public enum NodeState { occupied, empty, path, explored };
+    Color emptyColor = new Color32(173, 173, 173, 255);
+    Color occupiedColor = new Color32(255, 0, 0, 255);
+    Color pathColor = new Color32(0, 255, 0, 255);
 
-    public Material emptyMaterial;
-    public Material occupiedMaterial;
-    public Material pathMaterial;
-    public Material exploredMaterial;
+    bool isPath;
+    int intersectCount = 0;
 
-    private int intersectCount = 0;
-
-    private NodeState state;
-    public NodeState State {
-        get { return state; }
+    float cost;
+    public float Cost {
+        get { return cost; }
         set {
-            if(value != state)
-            {
-                state = value;
-                switch (value)
-                {
-                    case NodeState.empty:
-                        GetComponent<MeshRenderer>().material = emptyMaterial;
-                        break;
-                    case NodeState.occupied:
-                        GetComponent<MeshRenderer>().material = occupiedMaterial;
-                        break;
-                    case NodeState.path:
-                        GetComponent<MeshRenderer>().material = pathMaterial;
-                        break;
-                    case NodeState.explored:
-                        GetComponent<MeshRenderer>().material = exploredMaterial;
-                        break;
-                    default:
-                        break;
-                }
-            }
+            cost = Mathf.Clamp(value, 0.0f, 100.0f);
+            GetComponent<Renderer>().material.color = Color.Lerp(emptyColor, occupiedColor, cost / 100.0f);
         }
     }
 
+
     void Awake()
     {
-        State = NodeState.empty;
+        Cost = 0.0f;
     }
 
-    void Start()
+
+    public void SetOccupied()
     {
-
+        Cost = 100.0f;
     }
 
-    void Update()
+
+    public void SetPath(bool path)
     {
-
+        isPath = path;
+        if (isPath)
+        {
+            GetComponent<Renderer>().material.color = pathColor;
+        }
+        else
+        {
+            Cost = cost;
+        }
     }
+
+
+    public bool IsOccupied()
+    {
+        return cost == 100.0f;
+    }
+
+
+    public bool IsPath()
+    {
+        return isPath;
+    }
+
+
     
+
+
     private void OnTriggerEnter(Collider collided)
     {
-        
+
         if (collided.gameObject.layer == LayerMask.NameToLayer("Obstacles"))
         {
             intersectCount++;
             if (intersectCount > 0)
             {
-                State = NodeState.occupied;
+                SetOccupied();
             }
             else
             {
-                State = NodeState.empty;
+                Cost = 0.0f;
             }
         }
     }
+
 
     private void OnTriggerExit(Collider collided)
     {
@@ -82,11 +89,11 @@ public class Node : MonoBehaviour
             intersectCount--;
             if (intersectCount > 0)
             {
-                State = NodeState.occupied;
+                SetOccupied();
             }
             else
             {
-                State = NodeState.empty;
+                Cost = 0.0f;
             }
         }
 

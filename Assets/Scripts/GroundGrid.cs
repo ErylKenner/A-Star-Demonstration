@@ -39,7 +39,7 @@ public class GroundGrid : MonoBehaviour
         {
             for (int j = 0; j < Rows * Columns; ++j)
             {
-                adjacencyMatrix[i, j] = 0.0f;
+                adjacencyMatrix[i, j] = Mathf.Infinity;
             }
         }
 
@@ -64,28 +64,24 @@ public class GroundGrid : MonoBehaviour
 
     public void UpdateObstacleCollisions()
     {
-        foreach (GameObject obstacle in obstacleManager.Obstacles)
+        for (int i = 0; i < nodes.Count; ++i)
         {
-            //Set node value based on distance to obstacle
-        }
-        for (int row = 0; row < Rows; ++row)
-        {
-            for (int col = 0; col < Columns; ++col)
+            foreach (GameObject obstacle in obstacleManager.Obstacles)
             {
-                int curIndex = col + row * Columns;
-                markAdjacencymatrix(row, col, curIndex);
+                //Add to node value based on distance to obstacle
             }
+            markAdjacencymatrix(i);
         }
     }
 
 
-    public void SetUnoccupiedNodesToEmpty()
+    public void HidePath()
     {
         for (int i = 0; i < nodes.Count; ++i)
         {
-            if (nodes.ElementAt(i).State != Node.NodeState.occupied)
+            if (!nodes.ElementAt(i).IsOccupied())
             {
-                nodes.ElementAt(i).State = Node.NodeState.empty;
+                nodes.ElementAt(i).SetPath(false);
             }
         }
     }
@@ -107,15 +103,24 @@ public class GroundGrid : MonoBehaviour
     {
         for (int i = 0; i < path.Count; ++i)
         {
-            nodes.ElementAt(path.ElementAt(i)).State = Node.NodeState.path;
+            nodes.ElementAt(path.ElementAt(i)).SetPath(true);
         }
     }
 
 
-    void markAdjacencymatrix(int row, int col, int cur)
+    void markAdjacencymatrix(int cur)
     {
-        if (nodes.ElementAt(cur).State != Node.NodeState.occupied)
+        if (nodes.ElementAt(cur).IsOccupied())
         {
+            for (int n = 0; n < nodes.Count; ++n)
+            {
+                adjacencyMatrix[n, cur] = Mathf.Infinity;
+            }
+        }
+        else
+        {
+            int row = cur / Columns;
+            int column = cur % Columns;
             int neighbor;
             /*
              * Each row of the adjacency matrix represents all the nodes that connect to that row's node.
@@ -127,44 +132,58 @@ public class GroundGrid : MonoBehaviour
 
             //Mark to the left
             neighbor = cur - 1;
-            if (col > 0 && nodes.ElementAt(neighbor).State != Node.NodeState.occupied)
+            if (column > 0 && !nodes.ElementAt(neighbor).IsOccupied())
             {
                 adjacencyMatrix[neighbor, cur] = 1.0f;
             }
 
             //Mark to the right
             neighbor = cur + 1;
-            if (col < Columns - 1 && nodes.ElementAt(neighbor).State != Node.NodeState.occupied)
+            if (column < Columns - 1 && !nodes.ElementAt(neighbor).IsOccupied())
             {
                 adjacencyMatrix[neighbor, cur] = 1.0f;
             }
 
             //Mark below
             neighbor = cur - Columns;
-            if (row > 0 && nodes.ElementAt(neighbor).State != Node.NodeState.occupied)
+            if (row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
             {
                 adjacencyMatrix[neighbor, cur] = 1.0f;
             }
 
             //Mark above
             neighbor = cur + Columns;
-            if (row < Rows - 1 && nodes.ElementAt(neighbor).State != Node.NodeState.occupied)
+            if (row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
             {
                 adjacencyMatrix[neighbor, cur] = 1.0f;
             }
-        }
-        else
-        {
-            for (int n = 0; n < nodes.Count; ++n)
+
+            //Mark bottom left diagonal
+            neighbor = cur - 1 - Columns;
+            if (column > 0 && row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
             {
-                if (n == cur)
-                {
-                    adjacencyMatrix[n, cur] = 1.0f;
-                }
-                else
-                {
-                    adjacencyMatrix[n, cur] = 0.0f;
-                }
+                adjacencyMatrix[neighbor, cur] = 1.0f;
+            }
+
+            //Mark bottom right diagonal
+            neighbor = cur + 1 - Columns;
+            if (column < Columns - 1 && row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
+            {
+                adjacencyMatrix[neighbor, cur] = 1.0f;
+            }
+
+            //Mark top left diagonal
+            neighbor = cur - 1 + Columns;
+            if (column > 0 && row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
+            {
+                adjacencyMatrix[neighbor, cur] = 1.0f;
+            }
+
+            //Mark top right diagonal
+            neighbor = cur + 1 + Columns;
+            if (column < Columns - 1 && row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
+            {
+                adjacencyMatrix[neighbor, cur] = 1.0f;
             }
         }
     }
@@ -183,7 +202,7 @@ public class GroundGrid : MonoBehaviour
         startNode = endNode = null;
         StartSprite.transform.position = new Vector3(10000.0f, StartSprite.transform.position.y, StartSprite.transform.position.z);
         EndSprite.transform.position = new Vector3(10000.0f, EndSprite.transform.position.y, EndSprite.transform.position.z);
-        SetUnoccupiedNodesToEmpty();
+        HidePath();
     }
 
 

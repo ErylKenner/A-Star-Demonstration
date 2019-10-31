@@ -38,7 +38,7 @@ public class A_Star
 
             for (int neighbor = 0; neighbor < numNodes; ++neighbor)
             {
-                if (adjacencyMatrix[cur, neighbor] == 0.0f || visited.Contains(neighbor) || neighbor == cur)
+                if (adjacencyMatrix[cur, neighbor] == Mathf.Infinity || visited.Contains(neighbor) || neighbor == cur)
                 {
                     continue;
                 }
