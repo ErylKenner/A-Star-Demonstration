@@ -1086,10 +1086,14 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "This is a demonstration of the A* algorithm for path planning. Select a
-    start and end node and the optimal path will be shown in green. All nodes which
-    were explored are colored blue.\n\n\nControls:\n   - Left Click:  Set start node
-    position\n   - Right Click:  Set end node position\n   - R:  Regenerate obstacles\n
-    \  - Alt + Left Click: Create random obstacle at mouse position"
+    start and end node and the optimal path will be shown in green. Each obstacle
+    has 16 zones around it which have different strengths of influence (shown as the
+    intensity of red). These zones cost more to travel through, so A* tends to find
+    paths around them unless necessary. The zones are larger on the front and left
+    sides of obstacles, and smaller on the right and back.\n\n\nControls:\n   - Left
+    Click:  Set start node position\n   - Right Click:  Set end node position\n   -
+    R:  Regenerate obstacles\n   - Alt + Left Click: Create random obstacle at mouse
+    position"
 --- !u!222 &839021478
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1696,11 +1700,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d82267eaa0cf3fa45b89574093052591, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ObstacleCubePrefab: {fileID: 8057179707786473178, guid: c804f646cf31126468af3657d39cfd37,
-    type: 3}
-  ObstacleCylinderPrefab: {fileID: 2429842964357603318, guid: 61b26ede03335fc49bce7b7f387f3580,
-    type: 3}
-  ObstacleShipPrefab: {fileID: 8057179707786473178, guid: 4a7947590de8ada4eaa13303ae7a0c19,
+  ObstacleShipPrefab: {fileID: 2967615530717116747, guid: 4a7947590de8ada4eaa13303ae7a0c19,
     type: 3}
   numObstacles: 15
   groundGrid: {fileID: 543672985}
@@ -1891,7 +1891,7 @@ MonoBehaviour:
   m_FillRect: {fileID: 1654817249}
   m_HandleRect: {fileID: 262711069}
   m_Direction: 0
-  m_MinValue: 50
+  m_MinValue: 40
   m_MaxValue: 100
   m_WholeNumbers: 1
   m_Value: 75

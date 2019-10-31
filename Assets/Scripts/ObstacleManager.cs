@@ -5,18 +5,18 @@ using UnityEngine;
 
 public class ObstacleManager : MonoBehaviour
 {
-    public GameObject ObstacleCubePrefab;
-    public GameObject ObstacleCylinderPrefab;
-    public GameObject ObstacleShipPrefab;
+    //public GameObject ObstacleCubePrefab;
+    //public GameObject ObstacleCylinderPrefab;
+    public Obstacle ObstacleShipPrefab;
     public int numObstacles = 1;
     public GroundGrid groundGrid;
 
-    public List<GameObject> Obstacles { get => obstacles; }
-    List<GameObject> obstacles;
+    public List<Obstacle> Obstacles { get => obstacles; }
+    List<Obstacle> obstacles;
 
     private void Awake()
     {
-        obstacles = new List<GameObject>();
+        obstacles = new List<Obstacle>();
     }
 
     public void ResetObstacles()
@@ -59,8 +59,8 @@ public class ObstacleManager : MonoBehaviour
         cur.layer = LayerMask.NameToLayer("Obstacles");
         obstacles.Add(cur);*/
 
-        GameObject cur = Instantiate(ObstacleShipPrefab, pos, Quaternion.Euler(0.0f, Random.Range(-180.0f, 180.0f), 0.0f), this.transform);
-        cur.layer = LayerMask.NameToLayer("Obstacles");
+        Obstacle cur = Instantiate(ObstacleShipPrefab, pos, Quaternion.Euler(0.0f, Random.Range(-180.0f, 180.0f), 0.0f), this.transform) as Obstacle;
+        cur.gameObject.layer = LayerMask.NameToLayer("Obstacles");
         obstacles.Add(cur);
     }
 }

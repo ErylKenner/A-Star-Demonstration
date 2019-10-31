@@ -37,7 +37,7 @@ public class SceneManager : MonoBehaviour
                 state = State.CalculatePath2;
                 break;
             case State.CalculatePath2:
-                groundGrid.DisplayPath(A_Star.CalculatePath(groundGrid.GetStart(), groundGrid.GetEnd(), groundGrid.AdjacencyMatrix, groundGrid.heuristic));
+                groundGrid.DisplayPath(A_Star.CalculatePath(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid.AdjacencyMatrix, groundGrid.Heuristic));
                 state = State.None;
                 break;
 
