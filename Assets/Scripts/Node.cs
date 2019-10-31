@@ -17,8 +17,16 @@ public class Node : MonoBehaviour
     public float Cost {
         get { return cost; }
         set {
-            cost = Mathf.Clamp(value, 0.0f, 100.0f);
-            GetComponent<Renderer>().material.color = Color.Lerp(emptyColor, occupiedColor, cost / 100.0f);
+            cost = value;
+            if (cost < 0.0f)
+            {
+                cost = 0.0f;
+            }
+            else if (cost > 100.0f)
+            {
+                cost = 100.0f;
+            }
+            GetComponent<Renderer>().material.color = Color.Lerp(emptyColor, occupiedColor, cost / 101.0f);
         }
     }
 
@@ -31,7 +39,8 @@ public class Node : MonoBehaviour
 
     public void SetOccupied()
     {
-        Cost = 100.0f;
+        Cost = 101.0f; //Set color correctly
+        cost = 101.0f; //Set cost value correctly
     }
 
 
@@ -44,14 +53,21 @@ public class Node : MonoBehaviour
         }
         else
         {
-            Cost = cost;
+            if (IsOccupied())
+            {
+                SetOccupied();
+            }
+            else
+            {
+                Cost = cost;
+            }
         }
     }
 
 
     public bool IsOccupied()
     {
-        return cost == 100.0f;
+        return cost > 100.0f;
     }
 
 
@@ -59,9 +75,6 @@ public class Node : MonoBehaviour
     {
         return isPath;
     }
-
-
-    
 
 
     private void OnTriggerEnter(Collider collided)

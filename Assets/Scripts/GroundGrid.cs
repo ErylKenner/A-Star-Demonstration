@@ -56,7 +56,7 @@ public class GroundGrid : MonoBehaviour
                 cur.transform.localScale = new Vector3(1.0f / Columns, 1.0f / Rows, 1.0f);
                 nodes.Add(cur);
                 int curIndex = col + row * Columns;
-                adjacencyMatrix[curIndex, curIndex] = 1.0f;
+                adjacencyMatrix[curIndex, curIndex] = 10.0f;
             }
         }
     }
@@ -66,9 +66,19 @@ public class GroundGrid : MonoBehaviour
     {
         for (int i = 0; i < nodes.Count; ++i)
         {
-            foreach (GameObject obstacle in obstacleManager.Obstacles)
+            if (!nodes.ElementAt(i).IsOccupied())
             {
-                //Add to node value based on distance to obstacle
+                nodes.ElementAt(i).Cost = 0.0f;
+                const float radius = 15.0f;
+                foreach (GameObject obstacle in obstacleManager.Obstacles)
+                {
+                    float distance = Vector3.Distance(nodes.ElementAt(i).transform.position, obstacle.transform.position);
+                    if (distance <= radius)
+                    {
+                        nodes.ElementAt(i).Cost = nodes.ElementAt(i).Cost + 100.0f * (1.0f - distance / radius);
+                    }
+
+                }
             }
             markAdjacencymatrix(i);
         }
@@ -99,7 +109,7 @@ public class GroundGrid : MonoBehaviour
     }
 
 
-    public void ColorPath(List<int> path)
+    public void DisplayPath(List<int> path)
     {
         for (int i = 0; i < path.Count; ++i)
         {
@@ -110,81 +120,76 @@ public class GroundGrid : MonoBehaviour
 
     void markAdjacencymatrix(int cur)
     {
-        if (nodes.ElementAt(cur).IsOccupied())
+        int neighbor;
+        /*
+         * Each row of the adjacency matrix represents all the nodes that connect to that row's node.
+         * So, we mark this node as a neighbor in each of our neighbor's rows
+         * */
+        int row = cur / Columns;
+        int column = cur % Columns;
+        float cost = Mathf.Infinity;
+        if (!nodes.ElementAt(cur).IsOccupied())
         {
-            for (int n = 0; n < nodes.Count; ++n)
-            {
-                adjacencyMatrix[n, cur] = Mathf.Infinity;
-            }
+            cost = nodes.ElementAt(cur).Cost + 10.0f;
         }
-        else
+
+        //Mark the current square
+        adjacencyMatrix[cur, cur] = cost;
+
+        //Mark to the left
+        neighbor = cur - 1;
+        if (column > 0 && !nodes.ElementAt(neighbor).IsOccupied())
         {
-            int row = cur / Columns;
-            int column = cur % Columns;
-            int neighbor;
-            /*
-             * Each row of the adjacency matrix represents all the nodes that connect to that row's node.
-             * So, we mark this node as a neighbor in each of our neighbor's rows
-             * */
+            adjacencyMatrix[neighbor, cur] = cost;
+        }
 
-            //Mark the current square
-            adjacencyMatrix[cur, cur] = 1.0f;
+        //Mark to the right
+        neighbor = cur + 1;
+        if (column < Columns - 1 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[neighbor, cur] = cost;
+        }
 
-            //Mark to the left
-            neighbor = cur - 1;
-            if (column > 0 && !nodes.ElementAt(neighbor).IsOccupied())
-            {
-                adjacencyMatrix[neighbor, cur] = 1.0f;
-            }
+        //Mark below
+        neighbor = cur - Columns;
+        if (row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[neighbor, cur] = cost;
+        }
 
-            //Mark to the right
-            neighbor = cur + 1;
-            if (column < Columns - 1 && !nodes.ElementAt(neighbor).IsOccupied())
-            {
-                adjacencyMatrix[neighbor, cur] = 1.0f;
-            }
+        //Mark above
+        neighbor = cur + Columns;
+        if (row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[neighbor, cur] = cost;
+        }
 
-            //Mark below
-            neighbor = cur - Columns;
-            if (row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
-            {
-                adjacencyMatrix[neighbor, cur] = 1.0f;
-            }
+        //Mark bottom left diagonal
+        neighbor = cur - 1 - Columns;
+        if (column > 0 && row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[neighbor, cur] = cost;
+        }
 
-            //Mark above
-            neighbor = cur + Columns;
-            if (row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
-            {
-                adjacencyMatrix[neighbor, cur] = 1.0f;
-            }
+        //Mark bottom right diagonal
+        neighbor = cur + 1 - Columns;
+        if (column < Columns - 1 && row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[neighbor, cur] = cost;
+        }
 
-            //Mark bottom left diagonal
-            neighbor = cur - 1 - Columns;
-            if (column > 0 && row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
-            {
-                adjacencyMatrix[neighbor, cur] = 1.0f;
-            }
+        //Mark top left diagonal
+        neighbor = cur - 1 + Columns;
+        if (column > 0 && row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[neighbor, cur] = cost;
+        }
 
-            //Mark bottom right diagonal
-            neighbor = cur + 1 - Columns;
-            if (column < Columns - 1 && row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
-            {
-                adjacencyMatrix[neighbor, cur] = 1.0f;
-            }
-
-            //Mark top left diagonal
-            neighbor = cur - 1 + Columns;
-            if (column > 0 && row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
-            {
-                adjacencyMatrix[neighbor, cur] = 1.0f;
-            }
-
-            //Mark top right diagonal
-            neighbor = cur + 1 + Columns;
-            if (column < Columns - 1 && row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
-            {
-                adjacencyMatrix[neighbor, cur] = 1.0f;
-            }
+        //Mark top right diagonal
+        neighbor = cur + 1 + Columns;
+        if (column < Columns - 1 && row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[neighbor, cur] = cost;
         }
     }
 

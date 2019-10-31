@@ -43,7 +43,7 @@ public class A_Star
                     continue;
                 }
 
-                float gScore = gCost[cur] + 1.0f;
+                float gScore = gCost[cur] + adjacencyMatrix[cur, neighbor];
                 if (gScore < gCost[neighbor])
                 {
                     parent[neighbor] = cur;
