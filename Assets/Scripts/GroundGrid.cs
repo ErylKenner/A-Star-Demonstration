@@ -11,6 +11,7 @@ public class GroundGrid : MonoBehaviour
     public GameObject EndSprite;
     public Node startNode;
     public Node endNode;
+    public ObstacleManager obstacleManager;
     public float[,] AdjacencyMatrix { get => adjacencyMatrix; }
 
     private int Columns, Rows;
@@ -63,9 +64,9 @@ public class GroundGrid : MonoBehaviour
 
     public void UpdateObstacleCollisions()
     {
-        for (int i = 0; i < nodes.Count; ++i)
+        foreach (GameObject obstacle in obstacleManager.Obstacles)
         {
-            //Mark nodes[i] empty or occupied (or partially occupied if it's in a zone)
+            //Set node value based on distance to obstacle
         }
         for (int row = 0; row < Rows; ++row)
         {

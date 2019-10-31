@@ -58,10 +58,10 @@ public class Node : MonoBehaviour
 
     }
     
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider collided)
     {
         
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Obstacles"))
+        if (collided.gameObject.layer == LayerMask.NameToLayer("Obstacles"))
         {
             intersectCount++;
             if (intersectCount > 0)
@@ -75,12 +75,11 @@ public class Node : MonoBehaviour
         }
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider collided)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Obstacles"))
+        if (collided.gameObject.layer == LayerMask.NameToLayer("Obstacles"))
         {
             intersectCount--;
-            //Debug.Log("Left");
             if (intersectCount > 0)
             {
                 State = NodeState.occupied;

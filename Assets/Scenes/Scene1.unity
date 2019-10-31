@@ -305,7 +305,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.99215686, g: 1, b: 0.57254905, a: 1}
+  m_Color: {r: 0.81414837, g: 0.8207547, b: 0.46070665, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -688,14 +688,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NodePrefab: {fileID: 5771089708748159229, guid: 2b635e9c42998234988c8d5b5ac84985,
     type: 3}
-  Columns: 0
-  Rows: 0
   StartSprite: {fileID: 626614656}
   EndSprite: {fileID: 1783465956}
   startNode: {fileID: 0}
   endNode: {fileID: 0}
-  nodes: []
-  path: 
+  obstacleManager: {fileID: 1856670390}
 --- !u!4 &543672986
 Transform:
   m_ObjectHideFlags: 0

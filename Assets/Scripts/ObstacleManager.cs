@@ -11,7 +11,8 @@ public class ObstacleManager : MonoBehaviour
     public int numObstacles = 1;
     public GroundGrid groundGrid;
 
-    private List<GameObject> obstacles;
+    public List<GameObject> Obstacles { get => obstacles; }
+    List<GameObject> obstacles;
 
     private void Awake()
     {
