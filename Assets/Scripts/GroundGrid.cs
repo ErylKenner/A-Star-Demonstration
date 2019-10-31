@@ -191,6 +191,10 @@ public class GroundGrid : MonoBehaviour
 
     public float heuristic(int cur, int endNode)
     {
+        float diffX = Mathf.Abs(nodes.ElementAt(cur).transform.position.x - nodes.ElementAt(endNode).transform.position.x);
+        float diffZ = Mathf.Abs(nodes.ElementAt(cur).transform.position.z - nodes.ElementAt(endNode).transform.position.z);
+        return Mathf.Min(diffX, diffZ) * (Mathf.Sqrt(2) - 1.0f) + Mathf.Max(diffX, diffZ);
+
         Vector3 diff = nodes.ElementAt(cur).transform.position - nodes.ElementAt(endNode).transform.position;
         return Mathf.Abs(diff.x) + Mathf.Abs(diff.y) + Mathf.Abs(diff.z);
         //return Mathf.Abs(cur.xPos - endNode.xPos) + Mathf.Abs(cur.yPos - endNode.yPos);
