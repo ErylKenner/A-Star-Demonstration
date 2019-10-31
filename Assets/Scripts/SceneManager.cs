@@ -14,11 +14,13 @@ public class SceneManager : MonoBehaviour
 
     private enum State { None, RegenerateObstacles, RegenerateObstacles2, RegenerateObstacles3, CalculatePath, CalculatePath2, CalculateObstacleCollisions, RegenerateGrid, CreateObstacles };
     private State state;
+    private IEnumerator calculatePathCoroutine;
 
     void Start()
     {
         groundGrid.CreateGrid((int)ResolutionSlider.value, (int)ResolutionSlider.value);
         state = State.CreateObstacles;
+        calculatePathCoroutine = null;
     }
 
     public void SetBoardResolution()
@@ -37,7 +39,12 @@ public class SceneManager : MonoBehaviour
                 state = State.CalculatePath2;
                 break;
             case State.CalculatePath2:
-                groundGrid.DisplayPath(A_Star.CalculatePath(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid.AdjacencyMatrix, groundGrid.Heuristic));
+                if(calculatePathCoroutine != null)
+                {
+                    StopCoroutine(calculatePathCoroutine);
+                }
+                calculatePathCoroutine = A_Star.CalculatePath(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid.AdjacencyMatrix, groundGrid.Heuristic, groundGrid);
+                StartCoroutine(calculatePathCoroutine);
                 state = State.None;
                 break;
 

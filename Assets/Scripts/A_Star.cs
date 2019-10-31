@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class A_Star
 {
-    public static List<int> CalculatePath(int startNode, int endNode, float[,] adjacencyMatrix, System.Func<int, int, float> heuristic)
+    public static IEnumerator CalculatePath(int startNode, int endNode, float[,] adjacencyMatrix, System.Func<int, int, float> heuristic, GroundGrid groundGrid)
     {
         int numNodes = adjacencyMatrix.GetLength(0);
 
@@ -24,17 +24,20 @@ public class A_Star
         gCost[startNode] = 0.0f;
         fCost[startNode] = heuristic(startNode, endNode);
 
+        int count = 0;
         while (toVisit.Any())
         {
             int cur = getLowestCost(toVisit, fCost);
             if (cur == endNode)
             {
-                return createPathFromParent(endNode, parent);
+                groundGrid.DisplayPath(createPathFromParent(endNode, parent));
+                yield break;
             }
+            
 
             toVisit.Remove(cur);
             visited.Add(cur);
-            //nodes.ElementAt(cur).State = Node.NodeState.explored;
+            groundGrid.SetNodeExplored(cur, true);
 
             for (int neighbor = 0; neighbor < numNodes; ++neighbor)
             {
@@ -55,8 +58,15 @@ public class A_Star
                     }
                 }
             }
+            count++;
+            if(count >= 500)
+            {
+                count -= 500;
+                yield return null;
+            }
+            
         }
-        return createPathFromParent(endNode, parent);
+
     }
 
     static List<int> createPathFromParent(int endNode, int[] parent)

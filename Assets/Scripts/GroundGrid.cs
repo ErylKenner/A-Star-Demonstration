@@ -79,6 +79,12 @@ public class GroundGrid : MonoBehaviour
     }
 
 
+    public void SetNodeExplored(int index, bool explored)
+    {
+        nodes.ElementAt(index).SetExplored(explored);
+    }
+
+
     public void HidePath()
     {
         for (int i = 0; i < nodes.Count; ++i)
@@ -86,6 +92,7 @@ public class GroundGrid : MonoBehaviour
             if (!nodes.ElementAt(i).IsOccupied())
             {
                 nodes.ElementAt(i).SetPath(false);
+                nodes.ElementAt(i).SetExplored(false);
             }
         }
     }

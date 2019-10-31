@@ -9,8 +9,10 @@ public class Node : MonoBehaviour
     Color emptyColor = new Color32(173, 173, 173, 255);
     Color occupiedColor = new Color32(255, 0, 0, 255);
     Color pathColor = new Color32(0, 255, 0, 255);
+    Color exploredColor = new Color32(0, 0, 255, 255);
 
     bool isPath;
+    bool isExplored;
     int intersectCount = 0;
 
     float cost;
@@ -37,6 +39,29 @@ public class Node : MonoBehaviour
     }
 
 
+    public void SetExplored(bool explored)
+    {
+        isExplored = explored;
+        if (isExplored)
+        {
+            exploredColor.a = 0.8f - cost / 101.0f;
+            GetComponent<Renderer>().material.color = exploredColor;
+        }
+        else if (isPath)
+        {
+            SetPath(true);
+        }
+        else if (IsOccupied())
+        {
+            SetOccupied();
+        }
+        else
+        {
+            Cost = cost;
+        }
+    }
+
+
     public void SetOccupied()
     {
         Cost = 101.0f; //Set color correctly
@@ -51,16 +76,17 @@ public class Node : MonoBehaviour
         {
             GetComponent<Renderer>().material.color = pathColor;
         }
+        else if (isExplored)
+        {
+            SetExplored(true);
+        }
+        else if (IsOccupied())
+        {
+            SetOccupied();
+        }
         else
         {
-            if (IsOccupied())
-            {
-                SetOccupied();
-            }
-            else
-            {
-                Cost = cost;
-            }
+            Cost = cost;
         }
     }
 
