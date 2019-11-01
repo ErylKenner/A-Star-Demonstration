@@ -5,9 +5,12 @@ using UnityEngine;
 
 public class A_Star
 {
-    public static IEnumerator CalculatePath(int startNode, int endNode, float[,] adjacencyMatrix, System.Func<int, int, float> heuristic, GroundGrid groundGrid)
+    public static IEnumerator CalculatePath(int startNode, int endNode, GroundGrid groundGrid)
     {
-        int numNodes = adjacencyMatrix.GetLength(0);
+        int numNodes = groundGrid.AdjacencyMatrix.GetLength(0);
+        int numNeighbors = groundGrid.AdjacencyMatrix.GetLength(1);
+        //Debug.Log("num nodes: " + numNodes);
+        //Debug.Log("num neighbors: " + numNeighbors);
 
         List<int> toVisit = new List<int>();
         List<int> visited = new List<int>();
@@ -22,7 +25,7 @@ public class A_Star
 
         toVisit.Add(startNode);
         gCost[startNode] = 0.0f;
-        fCost[startNode] = heuristic(startNode, endNode);
+        fCost[startNode] = groundGrid.Heuristic(startNode, endNode);
 
         int count = 0;
         while (toVisit.Any())
@@ -33,25 +36,26 @@ public class A_Star
                 groundGrid.DisplayPath(createPathFromParent(endNode, parent));
                 yield break;
             }
-            
+
 
             toVisit.Remove(cur);
             visited.Add(cur);
             groundGrid.SetNodeExplored(cur, true);
 
-            for (int neighbor = 0; neighbor < numNodes; ++neighbor)
+            for (int i = 0; i < numNeighbors; ++i)
             {
-                if (adjacencyMatrix[cur, neighbor] == Mathf.Infinity || visited.Contains(neighbor) || neighbor == cur)
+                int neighbor = groundGrid.ConvertNeighborIndexToNodeIndex(cur, i);
+                if (groundGrid.AdjacencyMatrix[cur, i] == Mathf.Infinity || visited.Contains(neighbor) || neighbor == cur || neighbor == -1)
                 {
                     continue;
                 }
 
-                float gScore = gCost[cur] + adjacencyMatrix[cur, neighbor];
+                float gScore = gCost[cur] + groundGrid.AdjacencyMatrix[cur, i];
                 if (gScore < gCost[neighbor])
                 {
                     parent[neighbor] = cur;
                     gCost[neighbor] = gScore;
-                    fCost[neighbor] = gCost[neighbor] + heuristic(neighbor, endNode);
+                    fCost[neighbor] = gCost[neighbor] + groundGrid.Heuristic(neighbor, endNode);
                     if (!toVisit.Contains(neighbor))
                     {
                         toVisit.Add(neighbor);
@@ -59,13 +63,13 @@ public class A_Star
                 }
             }
             count++;
-            int iter = 50;
-            if(count >= iter)
+            const int nodesExploredPerFrame = 50;
+            if (count >= nodesExploredPerFrame)
             {
-                count -= iter;
+                count -= nodesExploredPerFrame;
                 yield return null;
             }
-            
+
         }
 
     }

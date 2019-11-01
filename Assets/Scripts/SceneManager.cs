@@ -31,7 +31,7 @@ public class SceneManager : MonoBehaviour
 
     void Update()
     {
-        LoadingText.SetActive(true);
+        //LoadingText.SetActive(true);
         if(state != State.CalculatePath2 && state != State.None)
         {
             if (calculatePathCoroutine != null)
@@ -46,7 +46,7 @@ public class SceneManager : MonoBehaviour
                 state = State.CalculatePath2;
                 break;
             case State.CalculatePath2:
-                calculatePathCoroutine = A_Star.CalculatePath(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid.AdjacencyMatrix, groundGrid.Heuristic, groundGrid);
+                calculatePathCoroutine = A_Star.CalculatePath(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
                 StartCoroutine(calculatePathCoroutine);
                 state = State.None;
                 break;
@@ -90,12 +90,12 @@ public class SceneManager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.R))
         {
             state = State.RegenerateObstacles;
+            LoadingText.SetActive(true);
         }
         else if (Input.GetMouseButtonDown(0))
         {
             if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
             {
-                state = State.CalculateObstacleCollisions;
                 //Create obstacle
                 RaycastHit hit;
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -104,6 +104,7 @@ public class SceneManager : MonoBehaviour
                     groundGrid.ResetPath();
                     obstacleManager.CreateObstacle(hit.point);
                     state = State.CalculateObstacleCollisions;
+                    LoadingText.SetActive(true);
                 }
             }
             else
@@ -122,6 +123,7 @@ public class SceneManager : MonoBehaviour
                         if (groundGrid.startNode != null && groundGrid.endNode != null)
                         {
                             state = State.CalculatePath;
+                            LoadingText.SetActive(true);
                         }
                     }
                 }
@@ -143,6 +145,7 @@ public class SceneManager : MonoBehaviour
                     if (groundGrid.startNode != null && groundGrid.endNode != null)
                     {
                         state = State.CalculatePath;
+                        LoadingText.SetActive(true);
                     }
                 }
             }

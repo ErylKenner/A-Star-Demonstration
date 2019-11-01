@@ -13,10 +13,13 @@ public class GroundGrid : MonoBehaviour
     public Node endNode;
     public ObstacleManager obstacleManager;
     public float[,] AdjacencyMatrix { get => adjacencyMatrix; }
+    public int Rows { get => rows; }
+    public int Columns { get => columns; }
 
-    private int Columns, Rows;
+    private int columns, rows;
     private List<Node> nodes;
     private float[,] adjacencyMatrix;
+    private int numNeighbors = 8;
 
 
     private void Awake()
@@ -25,38 +28,38 @@ public class GroundGrid : MonoBehaviour
     }
 
 
-    public void CreateGrid(int rows, int columns)
+    public void CreateGrid(int _rows, int _columns)
     {
-        if (rows == Rows || columns == Columns)
+        if (_rows == rows || _columns == columns)
         {
             return;
         }
-        Columns = columns;
-        Rows = rows;
+        columns = _columns;
+        rows = _rows;
         deleteGrid();
-        adjacencyMatrix = new float[Rows * Columns, Rows * Columns];
-        for (int i = 0; i < Rows * Columns; ++i)
+        adjacencyMatrix = new float[rows * columns, numNeighbors];
+        for (int i = 0; i < rows * columns; ++i)
         {
-            for (int j = 0; j < Rows * Columns; ++j)
+            for (int j = 0; j < numNeighbors; ++j)
             {
                 adjacencyMatrix[i, j] = Mathf.Infinity;
             }
         }
 
         //Create new nodes
-        float widthPerNode = transform.localScale.x / Columns;
-        float lengthPerNode = transform.localScale.y / Rows;
-        for (int row = 0; row < Rows; ++row)
+        float widthPerNode = transform.localScale.x / columns;
+        float lengthPerNode = transform.localScale.y / rows;
+        for (int row = 0; row < rows; ++row)
         {
-            for (int col = 0; col < Columns; ++col)
+            for (int col = 0; col < columns; ++col)
             {
-                float xPos = (col - 0.5f * (Columns - 1.0f)) * widthPerNode;
-                float yPos = (row - 0.5f * (Rows - 1.0f)) * lengthPerNode;
+                float xPos = (col - 0.5f * (columns - 1.0f)) * widthPerNode;
+                float yPos = (row - 0.5f * (rows - 1.0f)) * lengthPerNode;
                 Node cur = Instantiate(NodePrefab, transform.position + new Vector3(xPos, 0.0f, yPos), Quaternion.Euler(90.0f, 0.0f, 0.0f), this.transform);
-                cur.transform.localScale = new Vector3(1.0f / Columns, 1.0f / Rows, 1.0f);
+                cur.transform.localScale = new Vector3(1.0f / columns, 1.0f / rows, 1.0f);
                 nodes.Add(cur);
-                int curIndex = col + row * Columns;
-                adjacencyMatrix[curIndex, curIndex] = 10.0f;
+                int curIndex = col + row * columns;
+                //adjacencyMatrix[curIndex, curIndex] = 10.0f;
             }
         }
     }
@@ -110,6 +113,100 @@ public class GroundGrid : MonoBehaviour
     }
 
 
+    public int ConvertNeighborIndexToNodeIndex(int cur, int neighborIndex)
+    {
+        int curRow = cur / columns;
+        int curCol = cur % columns;
+        switch (neighborIndex)
+        {
+            case 0:
+                {
+                    if(curRow == rows - 1 || curCol == 0)
+                    {
+                        return -1;
+                    }
+                    int neighborRow = curRow + 1;
+                    int neighborColumn = curCol - 1;
+                    return neighborRow * columns + neighborColumn;
+                }
+            case 1:
+                {
+                    if(curRow == rows - 1)
+                    {
+                        return -1;
+                    }
+                    int neighborRow = curRow + 1;
+                    int neighborColumn = curCol;
+                    return neighborRow * columns + neighborColumn;
+                }
+            case 2:
+                {
+                    if(curRow == rows - 1 || curCol == columns - 1)
+                    {
+                        return -1;
+                    }
+                    int neighborRow = curRow + 1;
+                    int neighborColumn = curCol + 1;
+                    return neighborRow * columns + neighborColumn;
+                }
+            case 3:
+                {
+                    if(curCol == 0)
+                    {
+                        return -1;
+                    }
+                    int neighborRow = curRow;
+                    int neighborColumn = curCol - 1;
+                    return neighborRow * columns + neighborColumn;
+                }
+            case 4:
+                {
+                    if(curCol == columns - 1)
+                    {
+                        return -1;
+                    }
+                    int neighborRow = curRow;
+                    int neighborColumn = curCol + 1;
+                    return neighborRow * columns + neighborColumn;
+                }
+            case 5:
+                {
+                    if(curRow == 0 || curCol == 0)
+                    {
+                        return -1;
+                    }
+                    int neighborRow = curRow - 1;
+                    int neighborColumn = curCol - 1;
+                    return neighborRow * columns + neighborColumn;
+                }
+            case 6:
+                {
+                    if(curRow == 0)
+                    {
+                        return -1;
+                    }
+                    int neighborRow = curRow - 1;
+                    int neighborColumn = curCol;
+                    return neighborRow * columns + neighborColumn;
+                }
+            case 7:
+                {
+                    if(curRow == 0 || curCol == columns - 1)
+                    {
+                        return -1;
+                    }
+                    int neighborRow = curRow - 1;
+                    int neighborColumn = curCol + 1;
+                    return neighborRow * columns + neighborColumn;
+                }
+            default:
+                {
+                    return -1;
+                }
+        }
+    }
+
+
     public void DisplayPath(List<int> path)
     {
         for (int i = 0; i < path.Count; ++i)
@@ -148,8 +245,8 @@ public class GroundGrid : MonoBehaviour
          * Each row of the adjacency matrix represents all the nodes that connect to that row's node.
          * So, we mark this node as a neighbor in each of our neighbor's rows
          * */
-        int row = cur / Columns;
-        int column = cur % Columns;
+        int row = cur / columns;
+        int column = cur % columns;
         const float movementCost = 10.0f;
 
         float cost = Mathf.Infinity;
@@ -158,63 +255,69 @@ public class GroundGrid : MonoBehaviour
             cost = nodes.ElementAt(cur).Cost;
         }
 
-        //Mark the current square
-        adjacencyMatrix[cur, cur] = cost + movementCost;
+        int count = 0;
+
+        //Mark top left diagonal
+        neighbor = cur - 1 + columns;
+        if (column > 0 && row < rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[cur, count] = cost + Mathf.Sqrt(2) * movementCost;
+        }
+        count++;
+
+        //Mark above
+        neighbor = cur + columns;
+        if (row < rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[cur, count] = cost + movementCost;
+        }
+        count++;
+
+        //Mark top right diagonal
+        neighbor = cur + 1 + columns;
+        if (column < columns - 1 && row < rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[cur, count] = cost + Mathf.Sqrt(2) * movementCost;
+        }
+        count++;
 
         //Mark to the left
         neighbor = cur - 1;
         if (column > 0 && !nodes.ElementAt(neighbor).IsOccupied())
         {
-            adjacencyMatrix[neighbor, cur] = cost + movementCost;
+            adjacencyMatrix[cur, count] = cost + movementCost;
         }
+        count++;
 
         //Mark to the right
         neighbor = cur + 1;
-        if (column < Columns - 1 && !nodes.ElementAt(neighbor).IsOccupied())
+        if (column < columns - 1 && !nodes.ElementAt(neighbor).IsOccupied())
         {
-            adjacencyMatrix[neighbor, cur] = cost + movementCost;
+            adjacencyMatrix[cur, count] = cost + movementCost;
         }
-
-        //Mark below
-        neighbor = cur - Columns;
-        if (row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
-        {
-            adjacencyMatrix[neighbor, cur] = cost + movementCost;
-        }
-
-        //Mark above
-        neighbor = cur + Columns;
-        if (row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
-        {
-            adjacencyMatrix[neighbor, cur] = cost + movementCost;
-        }
+        count++;
 
         //Mark bottom left diagonal
-        neighbor = cur - 1 - Columns;
+        neighbor = cur - 1 - columns;
         if (column > 0 && row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
         {
-            adjacencyMatrix[neighbor, cur] = cost + Mathf.Sqrt(2) * movementCost;
+            adjacencyMatrix[cur, count] = cost + Mathf.Sqrt(2) * movementCost;
         }
+        count++;
+
+        //Mark below
+        neighbor = cur - columns;
+        if (row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
+        {
+            adjacencyMatrix[cur, count] = cost + movementCost;
+        }
+        count++;
 
         //Mark bottom right diagonal
-        neighbor = cur + 1 - Columns;
-        if (column < Columns - 1 && row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
+        neighbor = cur + 1 - columns;
+        if (column < columns - 1 && row > 0 && !nodes.ElementAt(neighbor).IsOccupied())
         {
-            adjacencyMatrix[neighbor, cur] = cost + Mathf.Sqrt(2) * movementCost;
-        }
-
-        //Mark top left diagonal
-        neighbor = cur - 1 + Columns;
-        if (column > 0 && row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
-        {
-            adjacencyMatrix[neighbor, cur] = cost + Mathf.Sqrt(2) * movementCost;
-        }
-
-        //Mark top right diagonal
-        neighbor = cur + 1 + Columns;
-        if (column < Columns - 1 && row < Rows - 1 && !nodes.ElementAt(neighbor).IsOccupied())
-        {
-            adjacencyMatrix[neighbor, cur] = cost + Mathf.Sqrt(2) * movementCost;
+            adjacencyMatrix[cur, count] = cost + Mathf.Sqrt(2) * movementCost;
         }
     }
 

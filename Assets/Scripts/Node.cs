@@ -41,6 +41,10 @@ public class Node : MonoBehaviour
 
     public void SetExplored(bool explored)
     {
+        if (explored && IsOccupied())
+        {
+            return;
+        }
         isExplored = explored;
         if (isExplored)
         {
@@ -48,13 +52,13 @@ public class Node : MonoBehaviour
             exploredColor.b = Mathf.Lerp(0.8f, 0.0f, Mathf.Sqrt(t));
             GetComponent<Renderer>().material.color = exploredColor;
         }
-        else if (isPath)
-        {
-            SetPath(true);
-        }
         else if (IsOccupied())
         {
             SetOccupied();
+        }
+        else if (isPath)
+        {
+            SetPath(true);
         }
         else
         {
@@ -72,18 +76,22 @@ public class Node : MonoBehaviour
 
     public void SetPath(bool path)
     {
+        if (path && IsOccupied())
+        {
+            return;
+        }
         isPath = path;
         if (isPath)
         {
             GetComponent<Renderer>().material.color = pathColor;
         }
-        else if (isExplored)
-        {
-            SetExplored(true);
-        }
         else if (IsOccupied())
         {
             SetOccupied();
+        }
+        else if (isExplored)
+        {
+            SetExplored(true);
         }
         else
         {
