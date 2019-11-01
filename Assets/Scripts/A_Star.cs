@@ -59,9 +59,10 @@ public class A_Star
                 }
             }
             count++;
-            if(count >= 500)
+            int iter = 50;
+            if(count >= iter)
             {
-                count -= 500;
+                count -= iter;
                 yield return null;
             }
             

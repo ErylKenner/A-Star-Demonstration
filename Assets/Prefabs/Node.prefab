@@ -59,7 +59,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2f455a633360bbf46a059fa9418737c4, type: 2}
+  - {fileID: 2100000, guid: 5f0bf9e8483d997438f4002c3c6adf85, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -91,10 +91,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19d5b39ff9ffa4248a9a56ad2b7e380a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  emptyMaterial: {fileID: 2100000, guid: bcbd5258df616504c87f8f815d340317, type: 2}
-  occupiedMaterial: {fileID: 2100000, guid: 2f455a633360bbf46a059fa9418737c4, type: 2}
-  pathMaterial: {fileID: 2100000, guid: b8ba0f2882c27b44c9f18c822827fc57, type: 2}
-  exploredMaterial: {fileID: 2100000, guid: 3a9a2e541aa031a4c8ed26d069a89f9b, type: 2}
+  emptyColor: {r: 0.6784314, g: 0.6784314, b: 0.6784314, a: 1}
+  occupiedColor: {r: 1, g: 0, b: 0, a: 1}
+  pathColor: {r: 0, g: 1, b: 0, a: 1}
+  exploredColor: {r: 0, g: 0, b: 1, a: 1}
 --- !u!65 &8605305470845921866
 BoxCollider:
   m_ObjectHideFlags: 0

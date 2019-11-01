@@ -32,6 +32,13 @@ public class SceneManager : MonoBehaviour
     void Update()
     {
         LoadingText.SetActive(true);
+        if(state != State.CalculatePath2 && state != State.None)
+        {
+            if (calculatePathCoroutine != null)
+            {
+                StopCoroutine(calculatePathCoroutine);
+            }
+        }
         switch (state)
         {
             case State.CalculatePath:
@@ -39,10 +46,6 @@ public class SceneManager : MonoBehaviour
                 state = State.CalculatePath2;
                 break;
             case State.CalculatePath2:
-                if(calculatePathCoroutine != null)
-                {
-                    StopCoroutine(calculatePathCoroutine);
-                }
                 calculatePathCoroutine = A_Star.CalculatePath(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid.AdjacencyMatrix, groundGrid.Heuristic, groundGrid);
                 StartCoroutine(calculatePathCoroutine);
                 state = State.None;

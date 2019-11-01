@@ -6,10 +6,10 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class Node : MonoBehaviour
 {
-    Color emptyColor = new Color32(173, 173, 173, 255);
-    Color occupiedColor = new Color32(255, 0, 0, 255);
-    Color pathColor = new Color32(0, 255, 0, 255);
-    Color exploredColor = new Color32(0, 0, 255, 255);
+    public Color emptyColor = new Color32(255, 200, 200, 255);
+    public Color occupiedColor = new Color32(255, 0, 0, 255);
+    public Color pathColor = new Color32(0, 255, 0, 255);
+    public Color exploredColor = new Color32(0, 0, 255, 255);
 
     bool isPath;
     bool isExplored;
@@ -44,7 +44,8 @@ public class Node : MonoBehaviour
         isExplored = explored;
         if (isExplored)
         {
-            exploredColor.a = 0.8f - cost / 101.0f;
+            float t = cost / 101.0f;
+            exploredColor.b = Mathf.Lerp(0.8f, 0.0f, Mathf.Sqrt(t));
             GetComponent<Renderer>().material.color = exploredColor;
         }
         else if (isPath)
