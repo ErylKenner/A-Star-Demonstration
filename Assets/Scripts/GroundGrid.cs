@@ -59,22 +59,24 @@ public class GroundGrid : MonoBehaviour
                 cur.transform.localScale = new Vector3(1.0f / columns, 1.0f / rows, 1.0f);
                 nodes.Add(cur);
                 int curIndex = col + row * columns;
-                //adjacencyMatrix[curIndex, curIndex] = 10.0f;
             }
         }
     }
 
 
-    public void UpdateObstacleCollisions()
+    public void UpdateObstacleCollisions(bool useZones)
     {
         for (int i = 0; i < nodes.Count; ++i)
         {
             if (!nodes.ElementAt(i).IsOccupied())
             {
                 nodes.ElementAt(i).Cost = 0.0f;
-                foreach (Obstacle obstacle in obstacleManager.Obstacles)
+                if (useZones)
                 {
-                    nodes.ElementAt(i).Cost += obstacle.GetCost(nodes.ElementAt(i).transform.position);
+                    foreach (Obstacle obstacle in obstacleManager.Obstacles)
+                    {
+                        nodes.ElementAt(i).Cost += obstacle.GetCost(nodes.ElementAt(i).transform.position);
+                    }
                 }
             }
             markAdjacencymatrix(i);
@@ -113,6 +115,12 @@ public class GroundGrid : MonoBehaviour
     }
 
 
+    public Vector3 GetNodePosition(int nodeIndex)
+    {
+        return nodes.ElementAt(nodeIndex).transform.position;
+    }
+
+
     public int ConvertNeighborIndexToNodeIndex(int cur, int neighborIndex)
     {
         int curRow = cur / columns;
@@ -121,7 +129,7 @@ public class GroundGrid : MonoBehaviour
         {
             case 0:
                 {
-                    if(curRow == rows - 1 || curCol == 0)
+                    if (curRow == rows - 1 || curCol == 0)
                     {
                         return -1;
                     }
@@ -131,7 +139,7 @@ public class GroundGrid : MonoBehaviour
                 }
             case 1:
                 {
-                    if(curRow == rows - 1)
+                    if (curRow == rows - 1)
                     {
                         return -1;
                     }
@@ -141,7 +149,7 @@ public class GroundGrid : MonoBehaviour
                 }
             case 2:
                 {
-                    if(curRow == rows - 1 || curCol == columns - 1)
+                    if (curRow == rows - 1 || curCol == columns - 1)
                     {
                         return -1;
                     }
@@ -151,7 +159,7 @@ public class GroundGrid : MonoBehaviour
                 }
             case 3:
                 {
-                    if(curCol == 0)
+                    if (curCol == 0)
                     {
                         return -1;
                     }
@@ -161,7 +169,7 @@ public class GroundGrid : MonoBehaviour
                 }
             case 4:
                 {
-                    if(curCol == columns - 1)
+                    if (curCol == columns - 1)
                     {
                         return -1;
                     }
@@ -171,7 +179,7 @@ public class GroundGrid : MonoBehaviour
                 }
             case 5:
                 {
-                    if(curRow == 0 || curCol == 0)
+                    if (curRow == 0 || curCol == 0)
                     {
                         return -1;
                     }
@@ -181,7 +189,7 @@ public class GroundGrid : MonoBehaviour
                 }
             case 6:
                 {
-                    if(curRow == 0)
+                    if (curRow == 0)
                     {
                         return -1;
                     }
@@ -191,7 +199,7 @@ public class GroundGrid : MonoBehaviour
                 }
             case 7:
                 {
-                    if(curRow == 0 || curCol == columns - 1)
+                    if (curRow == 0 || curCol == columns - 1)
                     {
                         return -1;
                     }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PathPlanner
 {
-    public static IEnumerator A_Star_CalculatePath(int startNode, int endNode, GroundGrid groundGrid)
+    public static IEnumerator A_Star(int startNode, int endNode, GroundGrid groundGrid)
     {
         int numNodes = groundGrid.AdjacencyMatrix.GetLength(0);
         int numNeighbors = groundGrid.AdjacencyMatrix.GetLength(1);
@@ -30,10 +30,10 @@ public class PathPlanner
         int count = 0;
         while (toVisit.Any())
         {
-            int cur = getLowestCost(toVisit, fCost);
+            int cur = A_Star_getLowestCost(toVisit, fCost);
             if (cur == endNode)
             {
-                groundGrid.DisplayPath(createPathFromParent(endNode, parent));
+                groundGrid.DisplayPath(A_Star_createPathFromParent(endNode, parent));
                 yield break;
             }
 
@@ -74,7 +74,7 @@ public class PathPlanner
 
     }
 
-    static List<int> createPathFromParent(int endNode, int[] parent)
+    static List<int> A_Star_createPathFromParent(int endNode, int[] parent)
     {
         List<int> path = new List<int>();
         for (int cur = endNode; cur != -1; cur = parent[cur])
@@ -84,7 +84,7 @@ public class PathPlanner
         return path;
     }
 
-    static int getLowestCost(List<int> toVisit, float[] cost)
+    static int A_Star_getLowestCost(List<int> toVisit, float[] cost)
     {
         int bestNode = -1;
         float bestCost = float.PositiveInfinity;
@@ -99,4 +99,75 @@ public class PathPlanner
         return bestNode;
     }
 
+
+    public static void RRT(int startNode, int endNode, GroundGrid groundGrid)
+    {
+        foreach (Transform child in groundGrid.transform)
+        {
+            if (child.name == "Line")
+            {
+                GameObject.Destroy(child.gameObject);
+            }
+        }
+
+        const int numPoints = 200;
+        List<int> nodes = new List<int>();
+        nodes.Add(startNode);
+
+        for (int i = 0; i < numPoints; ++i)
+        {
+            //Random State
+            int randNode = Random.Range(0, groundGrid.Rows * groundGrid.Columns);
+
+            //Nearest Neighbor
+            int closestNeighbor = nodes.ElementAt(0);
+            float minDist = Vector3.Distance(groundGrid.GetNodePosition(closestNeighbor), groundGrid.GetNodePosition(randNode));
+            for (int n = 0; n < nodes.Count; ++n)
+            {
+                float newDist = Vector3.Distance(groundGrid.GetNodePosition(nodes.ElementAt(n)), groundGrid.GetNodePosition(randNode));
+                if (newDist < minDist)
+                {
+                    minDist = newDist;
+                    closestNeighbor = nodes.ElementAt(n);
+                }
+            }
+
+            //Select Input
+
+            //New State
+            int newNode = StepTowards(closestNeighbor, randNode);
+
+            nodes.Add(newNode);
+            DrawLine(groundGrid.GetNodePosition(closestNeighbor), groundGrid.GetNodePosition(newNode), Color.red, groundGrid.transform, -1);
+
+        }
+
+
+    }
+
+    static int StepTowards(int start, int end)
+    {
+        return end;
+    }
+
+
+    static void DrawLine(Vector3 start, Vector3 end, Color color, Transform parent, float duration = -1.0f)
+    {
+        start.y += 0.1f;
+        end.y += 0.1f;
+        GameObject myLine = new GameObject("Line");
+        myLine.transform.parent = parent;
+        myLine.transform.position = start;
+        myLine.AddComponent<LineRenderer>();
+        LineRenderer lr = myLine.GetComponent<LineRenderer>();
+        lr.material = new Material(Shader.Find("Unlit/Color"));
+        lr.material.color = color;
+        lr.startWidth = lr.endWidth = 0.2f;
+        lr.SetPosition(0, start);
+        lr.SetPosition(1, end);
+        if (duration >= 0.0f)
+        {
+            GameObject.Destroy(myLine, duration);
+        }
+    }
 }

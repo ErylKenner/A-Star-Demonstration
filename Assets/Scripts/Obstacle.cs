@@ -10,7 +10,7 @@ public class Obstacle : MonoBehaviour
 
     private void Awake()
     {
-        
+
         List<float> temp = new List<float>(RadiusAtEachAngle);
         for (int i = 0; i < temp.Count; ++i)
         {
@@ -40,15 +40,15 @@ public class Obstacle : MonoBehaviour
         int prevIndex = (index - 1 + RadiusAtEachAngle.Count) % RadiusAtEachAngle.Count;
         int nextIndex = (index + 1) % RadiusAtEachAngle.Count;
         float distance = Vector3.Distance(nodePosition, transform.position);
-        if(distance <= RadiusAtEachAngle.ElementAt(index) || distance <= RadiusAtEachAngle.ElementAt(prevIndex) || distance <= RadiusAtEachAngle.ElementAt(nextIndex))
+        if (distance <= RadiusAtEachAngle.ElementAt(index) || distance <= RadiusAtEachAngle.ElementAt(prevIndex) || distance <= RadiusAtEachAngle.ElementAt(nextIndex))
         {
             float angleDiff = relativeAngle - Angles.ElementAt(index);
-            if (angleDiff < 0.0f)
+            while (angleDiff < 0.0f)
             {
                 angleDiff += 360.0f;
             }
             float angleRange = Angles.ElementAt(nextIndex) - Angles.ElementAt(index);
-            if (angleRange < 0.0f)
+            while (angleRange < 0.0f)
             {
                 angleRange += 360.0f;
             }

@@ -31,7 +31,6 @@ public class SceneManager : MonoBehaviour
 
     void Update()
     {
-        //LoadingText.SetActive(true);
         if(state != State.CalculatePath2 && state != State.None)
         {
             if (calculatePathCoroutine != null)
@@ -46,8 +45,9 @@ public class SceneManager : MonoBehaviour
                 state = State.CalculatePath2;
                 break;
             case State.CalculatePath2:
-                calculatePathCoroutine = PathPlanner.A_Star_CalculatePath(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
-                StartCoroutine(calculatePathCoroutine);
+                PathPlanner.RRT(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
+                //calculatePathCoroutine = PathPlanner.A_Star(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
+                //StartCoroutine(calculatePathCoroutine);
                 state = State.None;
                 break;
 
@@ -71,7 +71,7 @@ public class SceneManager : MonoBehaviour
                 break;
 
             case State.CalculateObstacleCollisions:
-                groundGrid.UpdateObstacleCollisions();
+                groundGrid.UpdateObstacleCollisions(false);
                 state = State.None;
                 break;
             case State.None:
@@ -82,6 +82,10 @@ public class SceneManager : MonoBehaviour
                 break;
         }
 
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Debug.DrawLine(groundGrid.startNode.transform.position, groundGrid.endNode.transform.position, Color.yellow);
+        }
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
