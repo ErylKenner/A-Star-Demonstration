@@ -46,7 +46,7 @@ public class SceneManager : MonoBehaviour
                 state = State.CalculatePath2;
                 break;
             case State.CalculatePath2:
-                calculatePathCoroutine = A_Star.CalculatePath(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
+                calculatePathCoroutine = PathPlanner.A_Star_CalculatePath(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
                 StartCoroutine(calculatePathCoroutine);
                 state = State.None;
                 break;

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class A_Star
+public class PathPlanner
 {
-    public static IEnumerator CalculatePath(int startNode, int endNode, GroundGrid groundGrid)
+    public static IEnumerator A_Star_CalculatePath(int startNode, int endNode, GroundGrid groundGrid)
     {
         int numNodes = groundGrid.AdjacencyMatrix.GetLength(0);
         int numNeighbors = groundGrid.AdjacencyMatrix.GetLength(1);
