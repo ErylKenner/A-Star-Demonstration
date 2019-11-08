@@ -57,8 +57,8 @@ public class GroundGrid : MonoBehaviour
                 float yPos = (row - 0.5f * (rows - 1.0f)) * lengthPerNode;
                 Node cur = Instantiate(NodePrefab, transform.position + new Vector3(xPos, 0.0f, yPos), Quaternion.Euler(90.0f, 0.0f, 0.0f), this.transform);
                 cur.transform.localScale = new Vector3(1.0f / columns, 1.0f / rows, 1.0f);
+                cur.ID = row * columns + col;
                 nodes.Add(cur);
-                int curIndex = col + row * columns;
             }
         }
     }
@@ -87,6 +87,11 @@ public class GroundGrid : MonoBehaviour
     public void SetNodeExplored(int index, bool explored)
     {
         nodes.ElementAt(index).SetExplored(explored);
+    }
+
+    public bool NodeIsOccupied(int nodeIndex)
+    {
+        return nodes.ElementAt(nodeIndex).IsOccupied();
     }
 
 

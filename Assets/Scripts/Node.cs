@@ -11,6 +11,8 @@ public class Node : MonoBehaviour
     public Color pathColor = new Color32(0, 255, 0, 255);
     public Color exploredColor = new Color32(0, 0, 255, 255);
 
+    public int ID;
+
     bool isPath;
     bool isExplored;
     int intersectCount = 0;

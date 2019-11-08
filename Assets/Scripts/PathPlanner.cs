@@ -100,7 +100,7 @@ public class PathPlanner
     }
 
 
-    public static void RRT(int startNode, int endNode, GroundGrid groundGrid)
+    public static IEnumerator RRT(int startNode, int endNode, GroundGrid groundGrid)
     {
         foreach (Transform child in groundGrid.transform)
         {
@@ -110,7 +110,7 @@ public class PathPlanner
             }
         }
 
-        const int numPoints = 200;
+        const int numPoints = 2000;
         List<int> nodes = new List<int>();
         nodes.Add(startNode);
 
@@ -118,6 +118,11 @@ public class PathPlanner
         {
             //Random State
             int randNode = Random.Range(0, groundGrid.Rows * groundGrid.Columns);
+            if (groundGrid.NodeIsOccupied(randNode) || nodes.Contains(randNode))
+            {
+                i--;
+                continue;
+            }
 
             //Nearest Neighbor
             int closestNeighbor = nodes.ElementAt(0);
@@ -135,19 +140,68 @@ public class PathPlanner
             //Select Input
 
             //New State
-            int newNode = StepTowards(closestNeighbor, randNode);
+            int newNode = RRT_StepTowards(closestNeighbor, randNode, groundGrid);
+            if (newNode == -1)
+            {
+                i--;
+                continue;
+            }
 
             nodes.Add(newNode);
             DrawLine(groundGrid.GetNodePosition(closestNeighbor), groundGrid.GetNodePosition(newNode), Color.red, groundGrid.transform, -1);
-
+            yield return null;
         }
 
-
+        yield break;
     }
 
-    static int StepTowards(int start, int end)
+    static int RRT_StepTowards(int start, int end, GroundGrid groundGrid)
     {
-        return end;
+        const float epsilon = 1.5f;
+        int ret = -1;
+        float dist = Vector3.Distance(groundGrid.GetNodePosition(start), groundGrid.GetNodePosition(end));
+        if (dist < epsilon)
+        {
+            ret = end;
+            RaycastHit[] hits;
+            hits = Physics.RaycastAll(groundGrid.GetNodePosition(start), groundGrid.GetNodePosition(end) - groundGrid.GetNodePosition(start), dist, 1 << LayerMask.NameToLayer("Node"));
+            for (int i = 0; i < hits.Length; ++i)
+            {
+                Node curNode = hits[i].collider.GetComponent<Node>();
+                if (curNode.IsOccupied())
+                {
+                    ret = -1;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            RaycastHit[] hits;
+            hits = Physics.RaycastAll(groundGrid.GetNodePosition(start), groundGrid.GetNodePosition(end) - groundGrid.GetNodePosition(start), epsilon, 1 << LayerMask.NameToLayer("Node"));
+            float maxDist = 0.0f;
+            for (int i = 0; i < hits.Length; ++i)
+            {
+                RaycastHit cur = hits[i];
+                Node curNode = cur.collider.GetComponent<Node>();
+                if (curNode.IsOccupied())
+                {
+                    ret = -1;
+                    break;
+                }
+                if(cur.distance > maxDist)
+                {
+                    maxDist = cur.distance;
+                    ret = curNode.ID;
+                }
+            }
+        }
+        RaycastHit hit;
+        if (Physics.Raycast(groundGrid.GetNodePosition(start), groundGrid.GetNodePosition(end) - groundGrid.GetNodePosition(start), out hit, epsilon, 1 << LayerMask.NameToLayer("Obstacles")))
+        {
+            ret = -1;
+        }
+        return ret;
     }
 
 

@@ -11,10 +11,12 @@ public class SceneManager : MonoBehaviour
 
     public GameObject LoadingText;
     public Slider ResolutionSlider;
+    public Toggle UseZones;
 
     private enum State { None, RegenerateObstacles, RegenerateObstacles2, RegenerateObstacles3, CalculatePath, CalculatePath2, CalculateObstacleCollisions, RegenerateGrid, CreateObstacles };
     private State state;
     private IEnumerator calculatePathCoroutine;
+    private bool useZones = false;
 
     void Start()
     {
@@ -27,6 +29,12 @@ public class SceneManager : MonoBehaviour
     {
         LoadingText.SetActive(true);
         state = State.RegenerateGrid;
+    }
+
+    public void SetZoneUsage()
+    {
+        useZones = UseZones.isOn;
+        state = State.CalculateObstacleCollisions;
     }
 
     void Update()
@@ -45,9 +53,9 @@ public class SceneManager : MonoBehaviour
                 state = State.CalculatePath2;
                 break;
             case State.CalculatePath2:
-                PathPlanner.RRT(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
+                calculatePathCoroutine = PathPlanner.RRT(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
                 //calculatePathCoroutine = PathPlanner.A_Star(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
-                //StartCoroutine(calculatePathCoroutine);
+                StartCoroutine(calculatePathCoroutine);
                 state = State.None;
                 break;
 
@@ -71,7 +79,7 @@ public class SceneManager : MonoBehaviour
                 break;
 
             case State.CalculateObstacleCollisions:
-                groundGrid.UpdateObstacleCollisions(false);
+                groundGrid.UpdateObstacleCollisions(useZones);
                 state = State.None;
                 break;
             case State.None:
