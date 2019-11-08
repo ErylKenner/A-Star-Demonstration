@@ -111,44 +111,45 @@ public class PathPlanner
         }
 
         const int numPoints = 2000;
+        List<int> possibleNodesToPick = new List<int>();
+        for (int i = 0; i < groundGrid.Rows * groundGrid.Columns; ++i)
+        {
+            if (!groundGrid.NodeIsOccupied(i))
+            {
+                possibleNodesToPick.Add(i);
+            }
+        }
         List<int> nodes = new List<int>();
         nodes.Add(startNode);
+        possibleNodesToPick.Remove(startNode);
 
         for (int i = 0; i < numPoints; ++i)
         {
-            //Random State
-            int randNode = Random.Range(0, groundGrid.Rows * groundGrid.Columns);
-            if (groundGrid.NodeIsOccupied(randNode) || nodes.Contains(randNode))
+            if (possibleNodesToPick.Count == 0)
+            {
+                yield break;
+            }
+            //Select random state
+            int randNode = possibleNodesToPick.ElementAt(Random.Range(0, possibleNodesToPick.Count));
+
+            //Get nearest neighbor
+            int nearestNeighbor = RRT_GetNearestNeighbor(randNode, nodes, groundGrid);
+
+            //Select input to use
+            //For now any input is valid
+
+            //Determine new state
+            int newNode = RRT_StepTowards(nearestNeighbor, randNode, groundGrid);
+            if (newNode == -1 || nodes.Contains(newNode))
             {
                 i--;
                 continue;
             }
 
-            //Nearest Neighbor
-            int closestNeighbor = nodes.ElementAt(0);
-            float minDist = Vector3.Distance(groundGrid.GetNodePosition(closestNeighbor), groundGrid.GetNodePosition(randNode));
-            for (int n = 0; n < nodes.Count; ++n)
-            {
-                float newDist = Vector3.Distance(groundGrid.GetNodePosition(nodes.ElementAt(n)), groundGrid.GetNodePosition(randNode));
-                if (newDist < minDist)
-                {
-                    minDist = newDist;
-                    closestNeighbor = nodes.ElementAt(n);
-                }
-            }
-
-            //Select Input
-
-            //New State
-            int newNode = RRT_StepTowards(closestNeighbor, randNode, groundGrid);
-            if (newNode == -1)
-            {
-                i--;
-                continue;
-            }
-
+            //Update the tree and available nodes
+            possibleNodesToPick.Remove(newNode);
             nodes.Add(newNode);
-            DrawLine(groundGrid.GetNodePosition(closestNeighbor), groundGrid.GetNodePosition(newNode), Color.red, groundGrid.transform, -1);
+            DrawLine(groundGrid.GetNodePosition(nearestNeighbor), groundGrid.GetNodePosition(newNode), Color.red, groundGrid.transform, -1);
             yield return null;
         }
 
@@ -157,7 +158,9 @@ public class PathPlanner
 
     static int RRT_StepTowards(int start, int end, GroundGrid groundGrid)
     {
-        const float epsilon = 1.5f;
+        //Only able to move one square (in any direction) in a single step
+        float epsilon = 1.45f * 100 / groundGrid.Columns;
+
         int ret = -1;
         float dist = Vector3.Distance(groundGrid.GetNodePosition(start), groundGrid.GetNodePosition(end));
         if (dist < epsilon)
@@ -189,7 +192,7 @@ public class PathPlanner
                     ret = -1;
                     break;
                 }
-                if(cur.distance > maxDist)
+                if (cur.distance > maxDist)
                 {
                     maxDist = cur.distance;
                     ret = curNode.ID;
@@ -202,6 +205,22 @@ public class PathPlanner
             ret = -1;
         }
         return ret;
+    }
+
+    static int RRT_GetNearestNeighbor(int randNode, List<int> nodes, GroundGrid groundGrid)
+    {
+        int nearestNeighbor = nodes.ElementAt(0);
+        float minDist = Vector3.Distance(groundGrid.GetNodePosition(nearestNeighbor), groundGrid.GetNodePosition(randNode));
+        for (int n = 0; n < nodes.Count; ++n)
+        {
+            float newDist = Vector3.Distance(groundGrid.GetNodePosition(nodes.ElementAt(n)), groundGrid.GetNodePosition(randNode));
+            if (newDist < minDist)
+            {
+                minDist = newDist;
+                nearestNeighbor = nodes.ElementAt(n);
+            }
+        }
+        return nearestNeighbor;
     }
 
 
