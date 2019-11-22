@@ -3140,9 +3140,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4441747609500114}
-  - component: {fileID: 4751141309106838179}
   - component: {fileID: 7177436358383387401}
   - component: {fileID: 8684415574685096714}
+  - component: {fileID: 1235142201980671437}
   m_Layer: 0
   m_Name: Obstacle (DDG51)
   m_TagString: Untagged
@@ -3165,19 +3165,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &4751141309106838179
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1493260802953620}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 52.70362, y: 143.11885, z: 392.8343}
-  m_Center: {x: 0, y: 35.97563, z: 9.928864}
 --- !u!54 &7177436358383387401
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3240,6 +3227,20 @@ MonoBehaviour:
   - 13
   - 15
   - 15
+--- !u!136 &1235142201980671437
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1493260802953620}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 26
+  m_Height: 391
+  m_Direction: 2
+  m_Center: {x: 0, y: 15.7, z: 9.4}
 --- !u!1 &1493954058935076
 GameObject:
   m_ObjectHideFlags: 0
