@@ -23,7 +23,7 @@ public class Actor : MonoBehaviour
     public List<Waypoint> waypoints;
     public float speed = 5.0f;
 
-    void Start()
+    void Awake()
     {
         waypoints = new List<Waypoint>();
     }

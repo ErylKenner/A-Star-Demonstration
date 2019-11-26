@@ -29,6 +29,8 @@ public class SceneManager : MonoBehaviour
         state = State.CreateObstacles;
         calculatePathCoroutine = null;
         outPath = new List<int>();
+        useRRT = UseRRT.isOn;
+        useZones = UseZones.isOn;
     }
 
     public void SetBoardResolution()
@@ -60,6 +62,10 @@ public class SceneManager : MonoBehaviour
         if (UseRRT.isOn)
         {
             UseZones.isOn = false;
+        }
+        else
+        {
+            UseZones.isOn = true;
         }
         actor.transform.position = new Vector3(10000, 0, 0);
         actor.waypoints.Clear();
