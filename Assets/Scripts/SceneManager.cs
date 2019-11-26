@@ -8,55 +8,118 @@ public class SceneManager : MonoBehaviour
 {
     public ObstacleManager obstacleManager;
     public GroundGrid groundGrid;
+    public Actor actor;
 
     public GameObject LoadingText;
     public Slider ResolutionSlider;
     public Toggle UseZones;
+    public Toggle UseRRT;
 
-    private enum State { None, RegenerateObstacles, RegenerateObstacles2, RegenerateObstacles3, CalculatePath, CalculatePath2, CalculateObstacleCollisions, RegenerateGrid, CreateObstacles };
+    private enum State { None, RegenerateObstacles, RegenerateObstacles2, RegenerateObstacles3, CalculatePath, CalculatePath2, CalculateObstacleCollisions, RegenerateGrid, CreateObstacles, ShowPath };
     private State state;
     private IEnumerator calculatePathCoroutine;
     private bool useZones = false;
+    private bool useRRT = false;
+    private List<int> outPath;
+    private bool finishedCalculatingPath = false;
 
     void Start()
     {
         groundGrid.CreateGrid((int)ResolutionSlider.value, (int)ResolutionSlider.value);
         state = State.CreateObstacles;
         calculatePathCoroutine = null;
+        outPath = new List<int>();
     }
 
     public void SetBoardResolution()
     {
         LoadingText.SetActive(true);
         state = State.RegenerateGrid;
+        actor.transform.position = new Vector3(10000, 0, 0);
+        actor.waypoints.Clear();
+        groundGrid.ResetPath();
     }
 
     public void SetZoneUsage()
     {
         useZones = UseZones.isOn;
+        groundGrid.ResetPath();
         state = State.CalculateObstacleCollisions;
+        if (UseZones.isOn)
+        {
+            UseRRT.isOn = false;
+        }
+        actor.transform.position = new Vector3(10000, 0, 0);
+        actor.waypoints.Clear();
+    }
+
+    public void SetRRTUsage()
+    {
+        groundGrid.ResetPath();
+        useRRT = UseRRT.isOn;
+        if (UseRRT.isOn)
+        {
+            UseZones.isOn = false;
+        }
+        actor.transform.position = new Vector3(10000, 0, 0);
+        actor.waypoints.Clear();
     }
 
     void Update()
     {
-        if(state != State.CalculatePath2 && state != State.None)
+        if (state != State.CalculatePath2 && state != State.ShowPath && state != State.None)
         {
             if (calculatePathCoroutine != null)
             {
                 StopCoroutine(calculatePathCoroutine);
+                calculatePathCoroutine = null;
             }
         }
         switch (state)
         {
             case State.CalculatePath:
                 groundGrid.HidePath();
+                outPath.Clear();
+                finishedCalculatingPath = false;
                 state = State.CalculatePath2;
                 break;
             case State.CalculatePath2:
-                calculatePathCoroutine = PathPlanner.RRT(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
-                //calculatePathCoroutine = PathPlanner.A_Star(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid);
-                StartCoroutine(calculatePathCoroutine);
-                state = State.None;
+                if (useRRT)
+                {
+                    if (calculatePathCoroutine == null)
+                    {
+                        calculatePathCoroutine = PathPlanner.RRT(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid, actor, outPath);
+                        StartCoroutine(calculatePathCoroutine);
+                    }
+                    state = State.ShowPath;
+                }
+                else
+                {
+                    if (calculatePathCoroutine == null)
+                    {
+                        calculatePathCoroutine = PathPlanner.A_Star(groundGrid.GetStartNodeIndex(), groundGrid.GetEndNodeIndex(), groundGrid, outPath);
+                        StartCoroutine(calculatePathCoroutine);
+                    }
+                    state = State.ShowPath;
+                }
+                break;
+            case State.ShowPath:
+                if (outPath.Count > 0)
+                {
+                    finishedCalculatingPath = true;
+                    actor.transform.position = groundGrid.GetNodePosition(outPath.ElementAt(0));
+                    actor.waypoints.Clear();
+                    foreach (int item in outPath)
+                    {
+                        actor.waypoints.Add(new Actor.Waypoint(groundGrid.GetNodePosition(item), Quaternion.Euler(0, 0, 0)));
+                    }
+                    state = State.None;
+                }
+                else if (finishedCalculatingPath)
+                {
+                    finishedCalculatingPath = false;
+                    state = State.None;
+                }
                 break;
 
             case State.RegenerateObstacles:
@@ -90,17 +153,14 @@ public class SceneManager : MonoBehaviour
                 break;
         }
 
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            Debug.DrawLine(groundGrid.startNode.transform.position, groundGrid.endNode.transform.position, Color.yellow);
-        }
-
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
         }
         else if (Input.GetKeyDown(KeyCode.R))
         {
+            actor.transform.position = new Vector3(10000, 0, 0);
+            actor.waypoints.Clear();
             state = State.RegenerateObstacles;
             LoadingText.SetActive(true);
         }
@@ -115,6 +175,8 @@ public class SceneManager : MonoBehaviour
                 {
                     groundGrid.ResetPath();
                     obstacleManager.CreateObstacle(hit.point);
+                    actor.transform.position = new Vector3(10000, 0, 0);
+                    actor.waypoints.Clear();
                     state = State.CalculateObstacleCollisions;
                     LoadingText.SetActive(true);
                 }
@@ -132,8 +194,11 @@ public class SceneManager : MonoBehaviour
                     {
                         groundGrid.StartSprite.transform.position = new Vector3(collidedNode.transform.position.x, groundGrid.StartSprite.transform.position.y, collidedNode.transform.position.z);
                         groundGrid.startNode = collidedNode;
+                        actor.transform.position = new Vector3(10000, 0, 0);
+                        actor.waypoints.Clear();
                         if (groundGrid.startNode != null && groundGrid.endNode != null)
                         {
+                            actor.transform.position = groundGrid.StartSprite.transform.position;
                             state = State.CalculatePath;
                             LoadingText.SetActive(true);
                         }
@@ -154,8 +219,11 @@ public class SceneManager : MonoBehaviour
                 {
                     groundGrid.EndSprite.transform.position = new Vector3(collidedNode.transform.position.x, groundGrid.EndSprite.transform.position.y, collidedNode.transform.position.z);
                     groundGrid.endNode = collidedNode;
+                    actor.transform.position = new Vector3(10000, 0, 0);
+                    actor.waypoints.Clear();
                     if (groundGrid.startNode != null && groundGrid.endNode != null)
                     {
+                        actor.transform.position = groundGrid.StartSprite.transform.position;
                         state = State.CalculatePath;
                         LoadingText.SetActive(true);
                     }

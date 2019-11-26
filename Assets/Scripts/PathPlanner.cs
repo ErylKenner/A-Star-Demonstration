@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PathPlanner
 {
-    public static IEnumerator A_Star(int startNode, int endNode, GroundGrid groundGrid)
+    public static IEnumerator A_Star(int startNode, int endNode, GroundGrid groundGrid, List<int> outPath)
     {
         int numNodes = groundGrid.AdjacencyMatrix.GetLength(0);
         int numNeighbors = groundGrid.AdjacencyMatrix.GetLength(1);
@@ -33,7 +33,11 @@ public class PathPlanner
             int cur = A_Star_getLowestCost(toVisit, fCost);
             if (cur == endNode)
             {
-                groundGrid.DisplayPath(CreatePathFromParent(endNode, parent));
+                foreach (int item in CreatePathFromParent(endNode, parent))
+                {
+                    outPath.Add(item);
+                }
+                groundGrid.DisplayPath(outPath);
                 yield break;
             }
 
@@ -100,8 +104,9 @@ public class PathPlanner
     }
 
 
-    public static IEnumerator RRT(int startNode, int endNode, GroundGrid groundGrid)
+    public static IEnumerator RRT(int startNode, int endNode, GroundGrid groundGrid, Actor actor, List<int> outPath)
     {
+        outPath.Clear();
         foreach (Transform child in groundGrid.transform)
         {
             if (child.name == "Line")
@@ -111,7 +116,7 @@ public class PathPlanner
         }
 
         int numNodes = groundGrid.Rows * groundGrid.Columns;
-        const int numPoints = 2000;
+        const int numAttempts = 2000;
         int[] parent = new int[numNodes];
         List<int> possibleNodesToPick = new List<int>();
         for (int i = 0; i < numNodes; ++i)
@@ -126,7 +131,7 @@ public class PathPlanner
         nodes.Add(startNode);
         possibleNodesToPick.Remove(startNode);
 
-        for (int i = 0; i < numPoints; ++i)
+        for (int i = 0; i < numAttempts; ++i)
         {
             if (possibleNodesToPick.Count == 0)
             {
@@ -140,7 +145,7 @@ public class PathPlanner
 
             //Determine new state
             int newNode = -1;
-            if (RRT_StepTowards(nearestNeighbor, randNode, ref newNode, groundGrid))
+            if (RRT_StepTowards(nearestNeighbor, randNode, ref newNode, groundGrid, actor))
             {
                 possibleNodesToPick.Remove(newNode);
                 nodes.Add(newNode);
@@ -148,14 +153,17 @@ public class PathPlanner
                 parent[newNode] = nearestNeighbor;
                 if (newNode == endNode)
                 {
-                    groundGrid.DisplayPath(CreatePathFromParent(endNode, parent));
+                    foreach (int item in CreatePathFromParent(endNode, parent))
+                    {
+                        outPath.Add(item);
+                    }
+                    groundGrid.DisplayPath(outPath);
                     yield break;
                 }
                 groundGrid.SetNodeExplored(newNode, true);
             }
             else
             {
-                i--;
                 continue;
             }
             yield return null;
@@ -178,7 +186,7 @@ public class PathPlanner
         return randNode;
     }
 
-    static bool RRT_StepTowards(int start, int end, ref int newNode, GroundGrid groundGrid)
+    static bool RRT_StepTowards(int start, int end, ref int newNode, GroundGrid groundGrid, Actor actor)
     {
         //Only able to move one square (in any direction) in a single step
         float epsilon = 1.45f * 100 / groundGrid.Columns;
@@ -186,6 +194,7 @@ public class PathPlanner
         RaycastHit hit;
         if (Physics.Raycast(groundGrid.GetNodePosition(start), groundGrid.GetNodePosition(end) - groundGrid.GetNodePosition(start), out hit, dist, 1 << LayerMask.NameToLayer("Obstacles")))
         {
+            //Obstacle between start and end nodes
             newNode = -1;
             return false;
         }
@@ -197,6 +206,7 @@ public class PathPlanner
             Node curNode = hits[i].collider.GetComponent<Node>();
             if (curNode.IsOccupied())
             {
+                //Occupied node between start and end nodes
                 newNode = -1;
                 return false;
             }
@@ -204,6 +214,20 @@ public class PathPlanner
             {
                 maxDist = hits[i].distance;
                 newNode = curNode.ID;
+            }
+        }
+
+        actor.transform.position = groundGrid.GetNodePosition(start);
+        int numSteps = 5;
+        for(int step = 0; step < numSteps; ++step)
+        {
+            actor.transform.position = Vector3.Lerp(groundGrid.GetNodePosition(start), groundGrid.GetNodePosition(newNode), (float)step / (numSteps - 1));
+            Collider[] colliderHits = Physics.OverlapBox(actor.transform.position, actor.GetComponent<Collider>().bounds.extents, actor.transform.rotation, 1 << LayerMask.NameToLayer("Obstacles"));
+            for(int i = 0; i < colliderHits.Length; ++i)
+            {
+                //Actor intersects an obstacle on its path from the start to end node
+                newNode = -1;
+                return false;
             }
         }
         return true;

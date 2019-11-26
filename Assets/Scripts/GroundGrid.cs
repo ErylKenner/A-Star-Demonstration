@@ -244,6 +244,13 @@ public class GroundGrid : MonoBehaviour
 
     public void ResetPath()
     {
+        foreach (Transform child in transform)
+        {
+            if (child.name == "Line")
+            {
+                GameObject.Destroy(child.gameObject);
+            }
+        }
         startNode = endNode = null;
         StartSprite.transform.position = new Vector3(10000.0f, StartSprite.transform.position.y, StartSprite.transform.position.z);
         EndSprite.transform.position = new Vector3(10000.0f, EndSprite.transform.position.y, EndSprite.transform.position.z);

@@ -468,9 +468,8 @@ GameObject:
   - component: {fileID: 8057179707786473188}
   - component: {fileID: 8057179707786473189}
   - component: {fileID: 8057179707786473185}
-  - component: {fileID: 2967615530717116747}
   m_Layer: 0
-  m_Name: Obstacle (Ship)
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -485,7 +484,7 @@ Transform:
   m_GameObject: {fileID: 8057179707786473178}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 1, z: 10}
+  m_LocalScale: {x: 3.5, y: 0.5, z: 6.5}
   m_Children:
   - {fileID: 388622889510875110}
   - {fileID: 3891600444981044545}
@@ -569,49 +568,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &2967615530717116747
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8057179707786473178}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7b83ae0caa800843b52dbda21725a80, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Angles:
-  - 0
-  - 22.5
-  - 45
-  - 67.5
-  - 90
-  - 112.5
-  - 135
-  - 157.5
-  - 180
-  - 202.5
-  - 225
-  - 247.5
-  - 270
-  - 292.5
-  - 315
-  - 337.5
-  RadiusAtEachAngle:
-  - 15
-  - 15
-  - 8
-  - 8
-  - 8
-  - 8
-  - 10
-  - 10
-  - 10
-  - 10
-  - 13
-  - 13
-  - 13
-  - 13
-  - 15
-  - 15
