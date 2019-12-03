@@ -1,7 +1,7 @@
 # Path-Planning
 
 ## Running the project
-This project is made in Unity. Download the the source and open it in Unity 2018.3.3 or later. A version built for WebGL is also viewable on my website https://www.cse.unr.edu/~erylk/.
+This project is made in Unity. Download the the source and open it in Unity 2018.3.3 or later. A version built for WebGL is also viewable here: https://www.cse.unr.edu/~erylk/.
 
 ## About the Project
 A demonstration of the A* algorithm for path planning. A* is the de facto path searching algorithm used in games and has many other applications throughout computer science. It works by iteratively exploring the "best" node which is directly traversable from the list of already explored nodes until the explored node is the goal. The "best" node is found by considering the path distance from each node to the start node start, combined with each the nodes' expected distance to the goal (using a heuristic), and picking the node with the lowest score.
